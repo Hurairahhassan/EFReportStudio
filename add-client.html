@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Profile — EF Financial Planning Portal</title>
+  <meta name="description" content="Add or edit client profile information including personal details, financial data, and account structure.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="logo">EF Financial Planning</div>
+    <div class="user-info">Logged in as: Maryann</div>
+  </header>
+
+  <div class="app-container">
+    <nav class="sidebar">
+      <ul class="sidebar-nav">
+        <li><a href="index.html"><i class="fas fa-th-large"></i> Dashboard</a></li>
+        <li><a href="clients.html"><i class="fas fa-users"></i> Clients</a></li>
+        <li><a href="add-client.html" class="active" id="nav-add-client"><i class="fas fa-user-plus"></i> Add Client</a></li>
+      </ul>
+    </nav>
+
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1 id="page-title">Add New Client</h1>
+          <p class="subtitle" id="page-subtitle">Enter client profile information. This data is entered once and reused for all quarterly reports.</p>
+        </div>
+        <a href="clients.html" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Clients</a>
+      </div>
+
+      <!-- ═══ SECTION 1: CLIENT INFORMATION ═══ -->
+      <div class="card mb-24 section-card">
+        <div class="card-title"><i class="fas fa-user-circle"></i> Section 1: Client Information</div>
+
+        <div class="form-group">
+          <label class="form-label">Client Type:</label>
+          <div class="d-flex gap-20">
+            <label class="check-inline">
+              <input type="radio" name="clientType" id="type-single" value="single" checked> Single
+            </label>
+            <label class="check-inline">
+              <input type="radio" name="clientType" id="type-married" value="married"> Married
+            </label>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <!-- Client 1 -->
+          <div>
+            <h4 class="section-heading"><i class="fas fa-user"></i> Client 1</h4>
+            <div class="form-group">
+              <label class="form-label" for="c1-name">Full Name <span class="required-dot">*</span></label>
+              <input type="text" id="c1-name" class="form-control" placeholder="e.g. John Doe" required>
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label class="form-label" for="c1-dob">Date of Birth <span class="required-dot">*</span></label>
+                <input type="date" id="c1-dob" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="c1-age">Age</label>
+                <input type="text" id="c1-age" class="form-control" readonly placeholder="Auto-calculated">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="c1-ssn">SSN Last 4 <span class="required-dot">*</span></label>
+              <input type="text" id="c1-ssn" class="form-control" maxlength="4" placeholder="e.g. 1234" required>
+            </div>
+          </div>
+
+          <!-- Client 2 -->
+          <div id="client2-section" style="display:none; border-left: 2px solid var(--primary-100); padding-left: 24px;">
+            <h4 class="section-heading"><i class="fas fa-user"></i> Client 2 (Spouse)</h4>
+            <div class="form-group">
+              <label class="form-label" for="c2-name">Full Name <span class="required-dot">*</span></label>
+              <input type="text" id="c2-name" class="form-control" placeholder="e.g. Jane Doe">
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label class="form-label" for="c2-dob">Date of Birth</label>
+                <input type="date" id="c2-dob" class="form-control">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="c2-age">Age</label>
+                <input type="text" id="c2-age" class="form-control" readonly placeholder="Auto-calculated">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="c2-ssn">SSN Last 4</label>
+              <input type="text" id="c2-ssn" class="form-control" maxlength="4" placeholder="e.g. 5678">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ SECTION 2: FINANCIAL DATA (STATIC) ═══ -->
+      <div class="card mb-24 section-card">
+        <div class="card-title"><i class="fas fa-dollar-sign"></i> Section 2: Financial Data (Static)</div>
+        <div class="grid-3">
+          <div class="form-group">
+            <label class="form-label" for="monthly-salary">Monthly Salary (After Tax) <span class="required-dot">*</span></label>
+            <div class="currency-input-wrap">
+              <span class="currency-symbol">$</span>
+              <input type="text" id="monthly-salary" class="form-control" placeholder="e.g. 15,000" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="expense-budget">Agreed Monthly Expense Budget <span class="required-dot">*</span></label>
+            <div class="currency-input-wrap">
+              <span class="currency-symbol">$</span>
+              <input type="text" id="expense-budget" class="form-control" placeholder="e.g. 11,000" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="ins-deductibles">Total Insurance Deductibles <span class="required-dot">*</span></label>
+            <div class="currency-input-wrap">
+              <span class="currency-symbol">$</span>
+              <input type="text" id="ins-deductibles" class="form-control" placeholder="e.g. 5,000" required>
+            </div>
+            <p class="form-hint">Sum of all insurance deductibles (health, auto, home, etc.)</p>
+          </div>
+        </div>
+        <div class="form-group mt-8">
+          <label class="form-label">Private Reserve Target</label>
+          <input type="text" id="private-reserve-target" class="form-control" readonly value="$0" style="max-width: 260px;">
+          <p class="form-hint">Auto-calculated: (6 × Monthly Expense Budget) + Insurance Deductibles</p>
+        </div>
+      </div>
+
+      <!-- ═══ SECTION 3: ACCOUNT STRUCTURE ═══ -->
+      <div class="card mb-24 section-card">
+        <div class="card-title"><i class="fas fa-building-columns"></i> Section 3: Account Structure</div>
+
+        <div class="grid-2">
+          <div>
+            <h4 class="section-heading"><i class="fas fa-piggy-bank"></i> Retirement Accounts</h4>
+            <div class="form-group mb-20">
+              <label class="form-label">Client 1 Retirement:</label>
+              <div class="d-flex flex-wrap gap-8">
+                <label class="check-inline"><input type="checkbox" name="c1-ret" value="IRA"> IRA</label>
+                <label class="check-inline"><input type="checkbox" name="c1-ret" value="Roth IRA"> Roth IRA</label>
+                <label class="check-inline"><input type="checkbox" name="c1-ret" value="401K"> 401K</label>
+                <label class="check-inline"><input type="checkbox" name="c1-ret" value="Pension"> Pension</label>
+              </div>
+            </div>
+            <div class="form-group" id="c2-accounts" style="display:none;">
+              <label class="form-label">Client 2 Retirement:</label>
+              <div class="d-flex flex-wrap gap-8">
+                <label class="check-inline"><input type="checkbox" name="c2-ret" value="IRA"> IRA</label>
+                <label class="check-inline"><input type="checkbox" name="c2-ret" value="Roth IRA"> Roth IRA</label>
+                <label class="check-inline"><input type="checkbox" name="c2-ret" value="401K"> 401K</label>
+                <label class="check-inline"><input type="checkbox" name="c2-ret" value="Pension"> Pension</label>
+              </div>
+            </div>
+
+            <h4 class="section-heading mt-24"><i class="fas fa-wallet"></i> Non-Retirement Accounts</h4>
+            <div class="form-group">
+              <div class="d-flex flex-wrap gap-8">
+                <label class="check-inline"><input type="checkbox" name="non-ret" value="Brokerage"> Brokerage</label>
+                <label class="check-inline"><input type="checkbox" name="non-ret" value="Joint Account"> Joint Account</label>
+                <label class="check-inline"><input type="checkbox" name="non-ret" value="Savings"> Savings</label>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="section-heading"><i class="fas fa-house"></i> Trust</h4>
+            <div class="form-group">
+              <label class="form-label" for="trust-address">Property Address (for Zillow lookup)</label>
+              <input type="text" id="trust-address" class="form-control" placeholder="e.g. 123 Main St, Atlanta, GA">
+            </div>
+
+            <h4 class="section-heading mt-24"><i class="fas fa-credit-card"></i> Liabilities</h4>
+            <div class="form-group">
+              <div class="d-flex align-center mb-12 gap-10">
+                <label class="check-inline" style="width:130px"><input type="checkbox" id="has-mortgage" value="Mortgage"> Mortgage</label>
+                <input type="number" step="0.1" id="rate-mortgage" class="form-control" placeholder="Rate %" style="width:120px" disabled>
+              </div>
+              <div class="d-flex align-center mb-12 gap-10">
+                <label class="check-inline" style="width:130px"><input type="checkbox" id="has-auto" value="Auto Loan"> Auto Loan</label>
+                <input type="number" step="0.1" id="rate-auto" class="form-control" placeholder="Rate %" style="width:120px" disabled>
+              </div>
+              <div class="d-flex align-center mb-12 gap-10">
+                <label class="check-inline" style="width:130px"><input type="checkbox" id="has-other" value="Other Loan"> Other Loan</label>
+                <input type="number" step="0.1" id="rate-other" class="form-control" placeholder="Rate %" style="width:120px" disabled>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="d-flex gap-15">
+        <button id="save-client-btn" class="btn btn-primary"><i class="fas fa-save"></i> Save Client</button>
+        <a href="clients.html" class="btn btn-secondary">Cancel</a>
+      </div>
+
+    </main>
+
+    <footer class="footer">
+      <span>© 2026 EF Financial Planning</span>
+      <span>Portal V1.0</span>
+    </footer>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const clientId = urlParams.get('id');
+
+      const typeSingle = document.getElementById('type-single');
+      const typeMarried = document.getElementById('type-married');
+      const c2Section = document.getElementById('client2-section');
+      const c2Accounts = document.getElementById('c2-accounts');
+
+      // ── Toggle Client 2 ──
+      function toggleClient2() {
+        if (typeMarried.checked) {
+          c2Section.style.display = 'block';
+          c2Accounts.style.display = 'block';
+          document.getElementById('c2-name').required = true;
+        } else {
+          c2Section.style.display = 'none';
+          c2Accounts.style.display = 'none';
+          document.getElementById('c2-name').required = false;
+        }
+      }
+      typeSingle.addEventListener('change', toggleClient2);
+      typeMarried.addEventListener('change', toggleClient2);
+
+      // ── DOB → Age ──
+      document.getElementById('c1-dob').addEventListener('change', function () {
+        document.getElementById('c1-age').value = app.calculateAge(this.value);
+      });
+      document.getElementById('c2-dob').addEventListener('change', function () {
+        document.getElementById('c2-age').value = app.calculateAge(this.value);
+      });
+
+      // ── Liability rate toggle ──
+      const toggleLiabilityInput = (chkId, inId) => {
+        document.getElementById(chkId).addEventListener('change', function () {
+          document.getElementById(inId).disabled = !this.checked;
+          if (!this.checked) document.getElementById(inId).value = '';
+        });
+      };
+      toggleLiabilityInput('has-mortgage', 'rate-mortgage');
+      toggleLiabilityInput('has-auto', 'rate-auto');
+      toggleLiabilityInput('has-other', 'rate-other');
+
+      // ── Private Reserve Target auto-calc ──
+      function updatePrivateReserveTarget() {
+        const expense = app.parseCurrency(document.getElementById('expense-budget').value);
+        const deductibles = app.parseCurrency(document.getElementById('ins-deductibles').value);
+        const target = expense * 6 + deductibles;
+        document.getElementById('private-reserve-target').value = app.formatCurrency(target);
+      }
+
+      document.getElementById('expense-budget').addEventListener('input', updatePrivateReserveTarget);
+      document.getElementById('ins-deductibles').addEventListener('input', updatePrivateReserveTarget);
+
+      // ── Currency formatting on blur ──
+      const currencyFields = ['monthly-salary', 'expense-budget', 'ins-deductibles'];
+      currencyFields.forEach(id => {
+        const el = document.getElementById(id);
+        el.addEventListener('blur', function () {
+          const val = app.parseCurrency(this.value);
+          if (val > 0) this.value = new Intl.NumberFormat('en-US').format(val);
+        });
+        el.addEventListener('focus', function () {
+          const val = app.parseCurrency(this.value);
+          this.value = val > 0 ? val : '';
+        });
+      });
+
+      // ── Load Data if Edit Mode ──
+      if (clientId) {
+        document.getElementById('page-title').textContent = 'Edit Client';
+        document.getElementById('page-subtitle').textContent = 'Update client profile information.';
+        document.getElementById('nav-add-client').innerHTML = '<i class="fas fa-pen-to-square"></i> Edit Client';
+        document.getElementById('nav-add-client').classList.add('active');
+
+        try {
+          const client = await dataManager.getClient(clientId);
+          if (client) {
+            // Type
+            if (client.type === 'married') {
+              typeMarried.checked = true;
+              toggleClient2();
+              document.getElementById('c2-name').value = client.client2.name;
+              document.getElementById('c2-dob').value = client.client2.dob;
+              document.getElementById('c2-age').value = client.client2.age;
+              document.getElementById('c2-ssn').value = client.client2.ssnLast4;
+              client.accounts.retirement.client2.forEach(v => {
+                const cb = document.querySelector(`input[name="c2-ret"][value="${v}"]`);
+                if (cb) cb.checked = true;
+              });
+            }
+
+            // Client 1
+            document.getElementById('c1-name').value = client.client1.name;
+            document.getElementById('c1-dob').value = client.client1.dob;
+            document.getElementById('c1-age').value = client.client1.age;
+            document.getElementById('c1-ssn').value = client.client1.ssnLast4;
+
+            // Financials
+            document.getElementById('monthly-salary').value = new Intl.NumberFormat('en-US').format(client.financials.monthlySalary);
+            document.getElementById('expense-budget').value = new Intl.NumberFormat('en-US').format(client.financials.expenseBudget);
+            document.getElementById('ins-deductibles').value = new Intl.NumberFormat('en-US').format(client.financials.insuranceDeductibles || 0);
+            updatePrivateReserveTarget();
+
+            // Retirement accounts
+            client.accounts.retirement.client1.forEach(v => {
+              const cb = document.querySelector(`input[name="c1-ret"][value="${v}"]`);
+              if (cb) cb.checked = true;
+            });
+
+            // Non-retirement
+            client.accounts.nonRetirement.forEach(v => {
+              const cb = document.querySelector(`input[name="non-ret"][value="${v}"]`);
+              if (cb) cb.checked = true;
+            });
+
+            // Trust
+            document.getElementById('trust-address').value = client.accounts.trust.address;
+
+            // Liabilities
+            client.accounts.liabilities.forEach(l => {
+              if (l.type === 'Mortgage') {
+                document.getElementById('has-mortgage').checked = true;
+                document.getElementById('rate-mortgage').value = l.rate;
+                document.getElementById('rate-mortgage').disabled = false;
+              }
+              if (l.type === 'Auto Loan') {
+                document.getElementById('has-auto').checked = true;
+                document.getElementById('rate-auto').value = l.rate;
+                document.getElementById('rate-auto').disabled = false;
+              }
+              if (l.type === 'Other Loan') {
+                document.getElementById('has-other').checked = true;
+                document.getElementById('rate-other').value = l.rate;
+                document.getElementById('rate-other').disabled = false;
+              }
+            });
+          }
+        } catch (err) {
+          app.showToast('Failed to load client data', 'error');
+        }
+      }
+
+      // ── Save Client ──
+      document.getElementById('save-client-btn').addEventListener('click', async () => {
+        const name1 = document.getElementById('c1-name').value.trim();
+        if (!name1) {
+          app.showToast('Client 1 name is required', 'error');
+          document.getElementById('c1-name').focus();
+          return;
+        }
+
+        const salary = app.parseCurrency(document.getElementById('monthly-salary').value);
+        const expense = app.parseCurrency(document.getElementById('expense-budget').value);
+        if (!salary || !expense) {
+          app.showToast('Monthly salary and expense budget are required', 'error');
+          return;
+        }
+
+        const deductibles = app.parseCurrency(document.getElementById('ins-deductibles').value);
+
+        const clientData = {
+          id: clientId ? Number(clientId) : null,
+          type: typeMarried.checked ? 'married' : 'single',
+          client1: {
+            name: document.getElementById('c1-name').value.trim(),
+            dob: document.getElementById('c1-dob').value,
+            age: document.getElementById('c1-age').value || 0,
+            ssnLast4: document.getElementById('c1-ssn').value,
+          },
+          client2: typeMarried.checked
+            ? {
+                name: document.getElementById('c2-name').value.trim(),
+                dob: document.getElementById('c2-dob').value,
+                age: document.getElementById('c2-age').value || 0,
+                ssnLast4: document.getElementById('c2-ssn').value,
+              }
+            : { name: '', dob: '', age: 0, ssnLast4: '' },
+          financials: {
+            monthlySalary: salary,
+            expenseBudget: expense,
+            insuranceDeductibles: deductibles,
+            privateReserveTarget: expense * 6 + deductibles,
+          },
+          accounts: {
+            retirement: {
+              client1: Array.from(document.querySelectorAll('input[name="c1-ret"]:checked')).map(el => el.value),
+              client2: typeMarried.checked
+                ? Array.from(document.querySelectorAll('input[name="c2-ret"]:checked')).map(el => el.value)
+                : [],
+            },
+            nonRetirement: Array.from(document.querySelectorAll('input[name="non-ret"]:checked')).map(el => el.value),
+            trust: {
+              address: document.getElementById('trust-address').value.trim(),
+            },
+            liabilities: [],
+          },
+          lastReportDate: null,
+        };
+
+        // Preserve lastReportDate on edit
+        if (clientId) {
+          try {
+            const existing = await dataManager.getClient(clientId);
+            clientData.lastReportDate = existing?.lastReportDate || null;
+          } catch (e) { /* ignore */ }
+        }
+
+        if (document.getElementById('has-mortgage').checked)
+          clientData.accounts.liabilities.push({ type: 'Mortgage', rate: parseFloat(document.getElementById('rate-mortgage').value) || 0 });
+        if (document.getElementById('has-auto').checked)
+          clientData.accounts.liabilities.push({ type: 'Auto Loan', rate: parseFloat(document.getElementById('rate-auto').value) || 0 });
+        if (document.getElementById('has-other').checked)
+          clientData.accounts.liabilities.push({ type: 'Other Loan', rate: parseFloat(document.getElementById('rate-other').value) || 0 });
+
+        try {
+          await dataManager.saveClient(clientData);
+          app.showToast('Client saved successfully!');
+          setTimeout(() => {
+            window.location.href = 'clients.html';
+          }, 800);
+        } catch (err) {
+          app.showToast('Failed to save client: ' + err.message, 'error');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

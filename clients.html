@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clients — EF Financial Planning Portal</title>
+  <meta name="description" content="View and manage all client profiles for EF Financial Planning quarterly reports.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="logo">EF Financial Planning</div>
+    <div class="user-info">Logged in as: Maryann</div>
+  </header>
+
+  <div class="app-container">
+    <nav class="sidebar">
+      <ul class="sidebar-nav">
+        <li><a href="index.html"><i class="fas fa-th-large"></i> Dashboard</a></li>
+        <li><a href="clients.html" class="active"><i class="fas fa-users"></i> Clients</a></li>
+        <li><a href="add-client.html"><i class="fas fa-user-plus"></i> Add Client</a></li>
+      </ul>
+    </nav>
+
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1>All Clients</h1>
+          <p class="subtitle" id="client-count-label">Loading...</p>
+        </div>
+        <a href="add-client.html" class="btn btn-primary"><i class="fas fa-plus"></i> Add New Client</a>
+      </div>
+
+      <div class="card">
+        <div class="d-flex justify-between align-center mb-20 gap-15">
+          <input type="text" id="search-client" class="form-control" placeholder="Search clients by name..." style="max-width:340px">
+        </div>
+
+        <div id="clients-table-wrap">
+          <p class="text-muted text-sm" style="padding:20px">Loading clients...</p>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <span>© 2026 EF Financial Planning</span>
+      <span>Portal V1.0</span>
+    </footer>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      let clients = [];
+
+      try {
+        clients = await dataManager.getClients();
+      } catch (err) {
+        app.showToast('Failed to load clients', 'error');
+      }
+
+      renderClients(clients);
+
+      document.getElementById('search-client').addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        const filtered = clients.filter(c => {
+          const name = c.type === 'married' ? `${c.client1.name} ${c.client2.name}` : c.client1.name;
+          return name.toLowerCase().includes(query);
+        });
+        renderClients(filtered);
+      });
+
+      function renderClients(list) {
+        document.getElementById('client-count-label').textContent = `${list.length} client${list.length !== 1 ? 's' : ''} on file`;
+
+        const wrap = document.getElementById('clients-table-wrap');
+
+        if (list.length === 0) {
+          wrap.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-search"></i>
+              <p>No clients found. Try a different search or add a new client.</p>
+              <a href="add-client.html" class="btn btn-primary"><i class="fas fa-plus"></i> Add Client</a>
+            </div>
+          `;
+          return;
+        }
+
+        let html = `
+          <table class="table" id="clients-table">
+            <thead>
+              <tr>
+                <th>Client Name</th>
+                <th>Type</th>
+                <th>Age</th>
+                <th>Last Report</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        list.forEach(client => {
+          const name = client.type === 'married'
+            ? `${client.client1.name} & ${client.client2.name}`
+            : client.client1.name;
+
+          const typeBadge = client.type === 'married'
+            ? '<span class="badge badge-married"><i class="fas fa-ring"></i> Married</span>'
+            : '<span class="badge badge-single"><i class="fas fa-user"></i> Single</span>';
+
+          const age = client.type === 'married'
+            ? `${client.client1.age} / ${client.client2.age}`
+            : client.client1.age;
+
+          const lastReport = client.lastReportDate || '—';
+
+          html += `
+            <tr>
+              <td><a href="add-client.html?id=${client.id}" class="client-link">${name}</a></td>
+              <td>${typeBadge}</td>
+              <td class="text-sm">${age}</td>
+              <td class="text-sm text-muted">${lastReport}</td>
+              <td class="actions-cell">
+                <a href="add-client.html?id=${client.id}" class="btn btn-secondary btn-sm"><i class="fas fa-pen"></i> Edit</a>
+                <a href="generate-report.html?id=${client.id}" class="btn btn-primary btn-sm"><i class="fas fa-file-invoice"></i> Report</a>
+                <button class="btn btn-danger btn-sm" onclick="deleteClient(${client.id})"><i class="fas fa-trash"></i></button>
+              </td>
+            </tr>
+          `;
+        });
+
+        html += '</tbody></table>';
+        wrap.innerHTML = html;
+      }
+
+      // Delete Client
+      window.deleteClient = async function(id) {
+        const confirmed = await app.showConfirm(
+          'Delete Client',
+          'Are you sure you want to permanently delete this client and all their data? This action cannot be undone.'
+        );
+        if (confirmed) {
+          try {
+            await dataManager.deleteClient(id);
+            clients = await dataManager.getClients();
+            renderClients(clients);
+            app.showToast('Client deleted successfully');
+          } catch (err) {
+            app.showToast('Failed to delete client', 'error');
+          }
+        }
+      };
+    });
+  </script>
+</body>
+</html>

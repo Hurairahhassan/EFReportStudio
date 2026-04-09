@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Redirecting...</title>
+  <script>
+    // edit-client.html is consolidated into add-client.html
+    // This file redirects to preserve any old bookmarks or links
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    window.location.replace(id ? `add-client.html?id=${id}` : 'add-client.html');
+  </script>
+</head>
+<body>
+  <p>Redirecting to client profile editor...</p>
+</body>
+</html>

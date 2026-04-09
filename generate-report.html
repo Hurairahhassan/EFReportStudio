@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generate Report — EF Financial Planning Portal</title>
+  <meta name="description" content="Enter quarterly balances to generate SACS and TCC reports for client meetings.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="logo">EF Financial Planning</div>
+    <div class="user-info">Logged in as: Maryann</div>
+  </header>
+
+  <div class="app-container">
+    <nav class="sidebar">
+      <ul class="sidebar-nav">
+        <li><a href="index.html"><i class="fas fa-th-large"></i> Dashboard</a></li>
+        <li><a href="clients.html" class="active"><i class="fas fa-users"></i> Clients</a></li>
+        <li><a href="add-client.html"><i class="fas fa-user-plus"></i> Add Client</a></li>
+      </ul>
+    </nav>
+
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1 id="page-title">Generate Quarterly Report</h1>
+          <p class="subtitle" id="last-report-text">Last Report: N/A</p>
+        </div>
+        <a href="clients.html" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Clients</a>
+      </div>
+
+      <!-- ═══ SACS DATA ═══ -->
+      <div class="card mb-24 section-card">
+        <div class="card-title"><i class="fas fa-chart-line"></i> SACS Data — Simple Automated Cash Flow</div>
+        <div class="grid-2">
+          <div>
+            <h4 class="section-heading">Pre-filled from Client Profile</h4>
+            <div class="form-group">
+              <label class="form-label">Inflow (Monthly Salary)</label>
+              <input type="text" id="sacs-inflow" class="form-control" readonly disabled>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Outflow (Expense Budget)</label>
+              <input type="text" id="sacs-outflow" class="form-control" readonly disabled>
+            </div>
+            <div class="form-group">
+              <label class="form-label fw-700" style="color: var(--primary-600)">Excess (Auto-calculated)</label>
+              <input type="text" id="sacs-excess" class="form-control" readonly disabled style="font-weight:700; color: var(--primary-700)">
+            </div>
+          </div>
+          <div>
+            <h4 class="section-heading">Enter Current Balances</h4>
+            <div class="form-group">
+              <label class="form-label">Private Reserve Balance <span class="required-warning">⚠ Required</span></label>
+              <input type="text" id="pr-balance" class="form-control dynamic-field" data-key="prBalance" required>
+              <div class="prev-value" id="prev-pr-balance"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Schwab Investment Balance <span class="required-warning">⚠ Required</span></label>
+              <input type="text" id="schwab-balance" class="form-control dynamic-field" data-key="schwabBalance" required>
+              <p class="form-hint">Total invested amount in Schwab</p>
+              <div class="prev-value" id="prev-schwab-balance"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Schwab Cash Balance <span class="required-warning">⚠ Required</span></label>
+              <input type="text" id="schwab-cash" class="form-control dynamic-field" data-key="schwabCash" required>
+              <p class="form-hint">Uninvested cash sitting in Schwab account</p>
+              <div class="prev-value" id="prev-schwab-cash"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Private Reserve Target</label>
+              <input type="text" id="pr-target" class="form-control" readonly disabled>
+              <p class="form-hint">(6 × Expense Budget) + Insurance Deductibles — from client profile</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ TCC DATA ═══ -->
+      <div class="card mb-24 section-card">
+        <div class="card-title"><i class="fas fa-chart-pie"></i> TCC Data — Total Client Chart (Net Worth)</div>
+
+        <div class="grid-2 mb-24">
+          <div>
+            <h4 class="section-heading"><i class="fas fa-piggy-bank"></i> Retirement Accounts</h4>
+            <div id="tcc-c1-accounts"></div>
+            <div class="tcc-total-box mt-12">
+              <span class="total-label">Client 1 Retirement Total</span>
+              <span class="total-value" id="tcc-c1-total">$0</span>
+            </div>
+
+            <div id="tcc-c2-container" style="display:none; margin-top:20px;">
+              <div id="tcc-c2-accounts"></div>
+              <div class="tcc-total-box mt-12">
+                <span class="total-label">Client 2 Retirement Total</span>
+                <span class="total-value" id="tcc-c2-total">$0</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="section-heading"><i class="fas fa-wallet"></i> Non-Retirement Accounts</h4>
+            <div id="tcc-non-ret"></div>
+            <div class="tcc-total-box mt-12">
+              <span class="total-label">Non-Retirement Total</span>
+              <span class="total-value" id="tcc-non-total">$0</span>
+            </div>
+
+            <h4 class="section-heading mt-24"><i class="fas fa-house"></i> Trust</h4>
+            <div class="form-group">
+              <label class="form-label" id="trust-label">Property: N/A</label>
+              <div class="d-flex align-center gap-10">
+                <span class="text-sm text-muted" style="white-space:nowrap">Zillow Value: <span class="required-warning">⚠</span></span>
+                <input type="text" id="trust-value" class="form-control dynamic-field" data-key="trustValue" style="max-width:180px" required>
+              </div>
+              <div class="prev-value" id="prev-trust-value"></div>
+            </div>
+
+            <h4 class="section-heading mt-24"><i class="fas fa-credit-card"></i> Liabilities <span class="text-sm text-muted fw-600">(NOT subtracted from net worth)</span></h4>
+            <div id="tcc-liabilities"></div>
+            <div class="tcc-total-box mt-12">
+              <span class="total-label">Total Liabilities</span>
+              <span class="total-value" id="tcc-liab-total">$0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grand Total -->
+        <div class="grand-total-banner">
+          <h2>GRAND TOTAL NET WORTH: <span id="grand-total">$0</span></h2>
+          <small>Client 1 Retirement + Client 2 Retirement + Non-Retirement + Trust</small>
+        </div>
+      </div>
+
+      <!-- Missing Fields Counter -->
+      <div class="mb-20">
+        <div class="missing-counter has-missing" id="missing-counter">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span><span id="missing-count">0</span> fields incomplete</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="d-flex gap-15">
+        <button id="generate-btn" class="btn btn-primary" disabled><i class="fas fa-file-pdf"></i> Generate PDF Reports</button>
+        <button id="save-draft-btn" class="btn btn-secondary"><i class="fas fa-save"></i> Save as Draft</button>
+        <a href="clients.html" class="btn btn-secondary">Cancel</a>
+      </div>
+
+    </main>
+
+    <footer class="footer">
+      <span>© 2026 EF Financial Planning</span>
+      <span>Portal V1.0</span>
+    </footer>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const clientId = urlParams.get('id');
+
+      if (!clientId) { window.location.href = 'clients.html'; return; }
+
+      let client;
+      try {
+        client = await dataManager.getClient(clientId);
+      } catch (e) {
+        app.showToast('Client not found', 'error');
+        window.location.href = 'clients.html';
+        return;
+      }
+      if (!client) { window.location.href = 'clients.html'; return; }
+
+      const clientName = client.type === 'married' ? `${client.client1.name} & ${client.client2.name}` : client.client1.name;
+      document.getElementById('page-title').textContent = `Generate Report — ${clientName}`;
+      document.getElementById('last-report-text').textContent = `Last Report: ${client.lastReportDate || 'N/A'}`;
+
+      // Get last report data for "Use Last Value"
+      let lastReport = null;
+      try {
+        lastReport = await dataManager.getLatestReport(clientId);
+      } catch (e) { /* no previous report */ }
+
+      // ── Populate SACS Static Fields ──
+      document.getElementById('sacs-inflow').value = app.formatCurrency(client.financials.monthlySalary);
+      document.getElementById('sacs-outflow').value = app.formatCurrency(client.financials.expenseBudget);
+      document.getElementById('sacs-excess').value = app.formatCurrency(client.financials.monthlySalary - client.financials.expenseBudget);
+      document.getElementById('pr-target').value = app.formatCurrency(client.financials.privateReserveTarget || (client.financials.expenseBudget * 6 + (client.financials.insuranceDeductibles || 0)));
+
+      // ── Show Previous Values ──
+      function showPrevValue(elementId, key) {
+        if (lastReport && lastReport[key]) {
+          const el = document.getElementById(elementId);
+          if (el) {
+            el.innerHTML = `Last quarter: ${app.formatCurrency(lastReport[key])} <button class="use-last-btn" data-target="${key}" data-value="${lastReport[key]}"><i class="fas fa-redo"></i> Use</button>`;
+          }
+        }
+      }
+      showPrevValue('prev-pr-balance', 'prBalance');
+      showPrevValue('prev-schwab-balance', 'schwabBalance');
+      showPrevValue('prev-schwab-cash', 'schwabCash');
+      showPrevValue('prev-trust-value', 'trustValue');
+
+      // ── Dynamic Field Generator ──
+      function createField(id, label, dataKey, prevKey) {
+        const prevVal = lastReport && lastReport[prevKey] ? lastReport[prevKey] : null;
+        const prevHtml = prevVal
+          ? `<div class="prev-value" id="prev-${id}">Last quarter: ${app.formatCurrency(prevVal)} <button class="use-last-btn" data-target-id="${id}" data-value="${prevVal}"><i class="fas fa-redo"></i> Use</button></div>`
+          : '';
+
+        return `
+          <div class="form-group">
+            <label class="form-label">${label} <span class="required-warning">⚠ Required</span></label>
+            <input type="text" id="${id}" class="form-control dynamic-field tcc-input" data-key="${dataKey}" required>
+            ${prevHtml}
+          </div>
+        `;
+      }
+
+      // ── Build TCC Client 1 Retirement ──
+      let c1Html = `<p class="text-sm fw-600 text-muted mb-8">Client 1 — ${client.client1.name}</p>`;
+      client.accounts.retirement.client1.forEach((acct, i) => {
+        c1Html += createField(`tcc-c1-${i}`, acct, `c1_ret_${i}`, `c1_ret_${i}`);
+      });
+      document.getElementById('tcc-c1-accounts').innerHTML = c1Html;
+
+      // ── Build TCC Client 2 Retirement ──
+      if (client.type === 'married' && client.accounts.retirement.client2.length > 0) {
+        document.getElementById('tcc-c2-container').style.display = 'block';
+        let c2Html = `<p class="text-sm fw-600 text-muted mb-8">Client 2 — ${client.client2.name}</p>`;
+        client.accounts.retirement.client2.forEach((acct, i) => {
+          c2Html += createField(`tcc-c2-${i}`, acct, `c2_ret_${i}`, `c2_ret_${i}`);
+        });
+        document.getElementById('tcc-c2-accounts').innerHTML = c2Html;
+      }
+
+      // ── Build TCC Non-Retirement ──
+      let nrHtml = '';
+      client.accounts.nonRetirement.forEach((acct, i) => {
+        nrHtml += createField(`tcc-nr-${i}`, acct, `nr_${i}`, `nr_${i}`);
+      });
+      document.getElementById('tcc-non-ret').innerHTML = nrHtml;
+
+      // ── Build TCC Liabilities ──
+      let liabHtml = '';
+      client.accounts.liabilities.forEach((l, i) => {
+        liabHtml += createField(`tcc-liab-${i}`, `${l.type} (${l.rate}%)`, `liab_${i}`, `liab_${i}`);
+      });
+      document.getElementById('tcc-liabilities').innerHTML = liabHtml;
+
+      // Trust label
+      if (client.accounts.trust.address) {
+        document.getElementById('trust-label').textContent = `Property: ${client.accounts.trust.address}`;
+      }
+
+      // ── "Use Last Value" Buttons ──
+      document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.use-last-btn');
+        if (!btn) return;
+
+        const targetId = btn.dataset.targetId;
+        const targetKey = btn.dataset.target;
+        const val = Number(btn.dataset.value);
+
+        if (targetId) {
+          const input = document.getElementById(targetId);
+          if (input) {
+            input.value = app.formatCurrency(val);
+            formatAndCalculate();
+          }
+        } else if (targetKey) {
+          // For the top-level SACS fields
+          const input = document.querySelector(`[data-key="${targetKey}"]`);
+          if (input) {
+            input.value = app.formatCurrency(val);
+            formatAndCalculate();
+          }
+        }
+      });
+
+      // ── Calculation Engine ──
+      function formatAndCalculate() {
+        // Client 1 Retirement Total
+        let tccC1Sum = 0;
+        document.querySelectorAll('#tcc-c1-accounts .tcc-input').forEach(el => {
+          tccC1Sum += app.parseCurrency(el.value);
+        });
+        document.getElementById('tcc-c1-total').textContent = app.formatCurrency(tccC1Sum);
+
+        // Client 2 Retirement Total
+        let tccC2Sum = 0;
+        if (client.type === 'married') {
+          document.querySelectorAll('#tcc-c2-accounts .tcc-input').forEach(el => {
+            tccC2Sum += app.parseCurrency(el.value);
+          });
+          document.getElementById('tcc-c2-total').textContent = app.formatCurrency(tccC2Sum);
+        }
+
+        // Non-Retirement Total
+        let nrSum = 0;
+        document.querySelectorAll('#tcc-non-ret .tcc-input').forEach(el => {
+          nrSum += app.parseCurrency(el.value);
+        });
+        document.getElementById('tcc-non-total').textContent = app.formatCurrency(nrSum);
+
+        // Liabilities Total
+        let liabSum = 0;
+        document.querySelectorAll('#tcc-liabilities .tcc-input').forEach(el => {
+          liabSum += app.parseCurrency(el.value);
+        });
+        document.getElementById('tcc-liab-total').textContent = app.formatCurrency(liabSum);
+
+        // Trust Value
+        let trustVal = app.parseCurrency(document.getElementById('trust-value').value);
+
+        // Grand Total = Client1 + Client2 + Non-Ret + Trust (NOT liabilities)
+        let grandTotal = tccC1Sum + tccC2Sum + nrSum + trustVal;
+        document.getElementById('grand-total').textContent = app.formatCurrency(grandTotal);
+
+        checkMissing();
+      }
+
+      function checkMissing() {
+        const allRequired = document.querySelectorAll('.dynamic-field[required]');
+        let missing = 0;
+        allRequired.forEach(input => {
+          if (input.value.trim() === '') {
+            missing++;
+            input.classList.add('field-incomplete');
+            input.classList.remove('field-complete');
+          } else {
+            input.classList.remove('field-incomplete');
+            input.classList.add('field-complete');
+          }
+        });
+
+        const counter = document.getElementById('missing-counter');
+        const genBtn = document.getElementById('generate-btn');
+
+        if (missing === 0) {
+          counter.className = 'missing-counter all-complete';
+          counter.innerHTML = '<i class="fas fa-check-circle"></i> <span>All fields complete — ready to generate!</span>';
+          genBtn.disabled = false;
+        } else {
+          counter.className = 'missing-counter has-missing';
+          counter.innerHTML = `<i class="fas fa-exclamation-triangle"></i> <span>${missing} field${missing > 1 ? 's' : ''} incomplete</span>`;
+          genBtn.disabled = true;
+        }
+      }
+
+      // ── Currency formatting for all dynamic fields ──
+      document.addEventListener('blur', (e) => {
+        if (e.target.classList.contains('dynamic-field')) {
+          const val = app.parseCurrency(e.target.value);
+          if (val !== 0) {
+            e.target.value = app.formatCurrency(val);
+          }
+          formatAndCalculate();
+        }
+      }, true);
+
+      document.addEventListener('focus', (e) => {
+        if (e.target.classList.contains('dynamic-field')) {
+          const val = app.parseCurrency(e.target.value);
+          e.target.value = val > 0 ? val : '';
+        }
+      }, true);
+
+      // ── Real-time updates on input ──
+      document.addEventListener('input', (e) => {
+        if (e.target.classList.contains('dynamic-field')) {
+          checkMissing();
+          // Debounced calculation (no formatting until blur)
+          formatAndCalculate();
+        }
+      }, true);
+
+      // Initial check
+      checkMissing();
+
+      // ── Collect Report Data ──
+      function collectReportData() {
+        const data = {
+          clientId: Number(clientId),
+          clientName: clientName,
+          clientType: client.type,
+          client1: { ...client.client1 },
+          client2: client.type === 'married' ? { ...client.client2 } : null,
+
+          // SACS
+          inflow: client.financials.monthlySalary,
+          outflow: client.financials.expenseBudget,
+          excess: client.financials.monthlySalary - client.financials.expenseBudget,
+          prBalance: app.parseCurrency(document.getElementById('pr-balance').value),
+          schwabBalance: app.parseCurrency(document.getElementById('schwab-balance').value),
+          schwabCash: app.parseCurrency(document.getElementById('schwab-cash').value),
+          prTarget: client.financials.privateReserveTarget || (client.financials.expenseBudget * 6 + (client.financials.insuranceDeductibles || 0)),
+
+          // TCC - Retirement Client 1
+          retirementC1: [],
+          retirementC1Total: 0,
+
+          // TCC - Retirement Client 2
+          retirementC2: [],
+          retirementC2Total: 0,
+
+          // TCC - Non-Retirement
+          nonRetirement: [],
+          nonRetirementTotal: 0,
+
+          // TCC - Trust
+          trustAddress: client.accounts.trust.address,
+          trustValue: app.parseCurrency(document.getElementById('trust-value').value),
+
+          // TCC - Liabilities
+          liabilities: [],
+          liabilitiesTotal: 0,
+
+          grandTotal: 0,
+        };
+
+        // Client 1 Retirement
+        client.accounts.retirement.client1.forEach((acct, i) => {
+          const val = app.parseCurrency(document.getElementById(`tcc-c1-${i}`).value);
+          data.retirementC1.push({ type: acct, balance: val });
+          data[`c1_ret_${i}`] = val;
+          data.retirementC1Total += val;
+        });
+
+        // Client 2 Retirement
+        if (client.type === 'married') {
+          client.accounts.retirement.client2.forEach((acct, i) => {
+            const val = app.parseCurrency(document.getElementById(`tcc-c2-${i}`).value);
+            data.retirementC2.push({ type: acct, balance: val });
+            data[`c2_ret_${i}`] = val;
+            data.retirementC2Total += val;
+          });
+        }
+
+        // Non-Retirement
+        client.accounts.nonRetirement.forEach((acct, i) => {
+          const val = app.parseCurrency(document.getElementById(`tcc-nr-${i}`).value);
+          data.nonRetirement.push({ type: acct, balance: val });
+          data[`nr_${i}`] = val;
+          data.nonRetirementTotal += val;
+        });
+
+        // Liabilities
+        client.accounts.liabilities.forEach((l, i) => {
+          const val = app.parseCurrency(document.getElementById(`tcc-liab-${i}`).value);
+          data.liabilities.push({ type: l.type, rate: l.rate, balance: val });
+          data[`liab_${i}`] = val;
+          data.liabilitiesTotal += val;
+        });
+
+        data.grandTotal = data.retirementC1Total + data.retirementC2Total + data.nonRetirementTotal + data.trustValue;
+
+        return data;
+      }
+
+      // ── Generate Reports ──
+      document.getElementById('generate-btn').addEventListener('click', async () => {
+        const reportData = collectReportData();
+
+        try {
+          // Save to report history (backend)
+          await dataManager.saveReport(clientId, reportData);
+
+          // Pass to preview page via session storage
+          dataManager.setCurrentReport(reportData);
+
+          app.showToast('Generating Reports...', 'success');
+
+          setTimeout(() => {
+            window.location.href = `report-preview.html?id=${clientId}`;
+          }, 600);
+        } catch (err) {
+          app.showToast('Failed to save report: ' + err.message, 'error');
+        }
+      });
+
+      // ── Save Draft ──
+      document.getElementById('save-draft-btn').addEventListener('click', () => {
+        const reportData = collectReportData();
+        sessionStorage.setItem('draft_' + clientId, JSON.stringify(reportData));
+        app.showToast('Draft saved successfully!');
+      });
+
+      // ── Load Draft if exists ──
+      const draft = sessionStorage.getItem('draft_' + clientId);
+      if (draft) {
+        const draftData = JSON.parse(draft);
+        // Restore values from draft
+        if (draftData.prBalance) document.getElementById('pr-balance').value = app.formatCurrency(draftData.prBalance);
+        if (draftData.schwabBalance) document.getElementById('schwab-balance').value = app.formatCurrency(draftData.schwabBalance);
+        if (draftData.schwabCash) document.getElementById('schwab-cash').value = app.formatCurrency(draftData.schwabCash);
+        if (draftData.trustValue) document.getElementById('trust-value').value = app.formatCurrency(draftData.trustValue);
+
+        // Restore TCC values
+        if (draftData.retirementC1) {
+          draftData.retirementC1.forEach((acct, i) => {
+            const el = document.getElementById(`tcc-c1-${i}`);
+            if (el && acct.balance) el.value = app.formatCurrency(acct.balance);
+          });
+        }
+        if (draftData.retirementC2) {
+          draftData.retirementC2.forEach((acct, i) => {
+            const el = document.getElementById(`tcc-c2-${i}`);
+            if (el && acct.balance) el.value = app.formatCurrency(acct.balance);
+          });
+        }
+        if (draftData.nonRetirement) {
+          draftData.nonRetirement.forEach((acct, i) => {
+            const el = document.getElementById(`tcc-nr-${i}`);
+            if (el && acct.balance) el.value = app.formatCurrency(acct.balance);
+          });
+        }
+        if (draftData.liabilities) {
+          draftData.liabilities.forEach((l, i) => {
+            const el = document.getElementById(`tcc-liab-${i}`);
+            if (el && l.balance) el.value = app.formatCurrency(l.balance);
+          });
+        }
+
+        formatAndCalculate();
+      }
+    });
+  </script>
+</body>
+</html>

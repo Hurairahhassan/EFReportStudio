@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report Preview — EF Financial Planning Portal</title>
+  <meta name="description" content="Preview and download generated SACS and TCC quarterly reports.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+  <header class="header">
+    <div class="logo">EF Financial Planning</div>
+    <div class="user-info">Logged in as: Maryann</div>
+  </header>
+
+  <div class="app-container">
+    <nav class="sidebar">
+      <ul class="sidebar-nav">
+        <li><a href="index.html"><i class="fas fa-th-large"></i> Dashboard</a></li>
+        <li><a href="clients.html" class="active"><i class="fas fa-users"></i> Clients</a></li>
+        <li><a href="add-client.html"><i class="fas fa-user-plus"></i> Add Client</a></li>
+      </ul>
+    </nav>
+
+    <main class="main-content">
+
+      <div class="success-banner mb-24">
+        <i class="fas fa-check-circle"></i> Reports Generated Successfully!
+      </div>
+
+      <div class="text-center mb-28">
+        <h2 id="client-name-display" style="font-size:1.3rem; font-weight:800; color:var(--gray-900)">Client Name</h2>
+        <p class="text-sm text-muted" id="report-date-display">Date</p>
+      </div>
+
+      <!-- ═══ SACS REPORT ═══ -->
+      <div class="card mb-28">
+        <div class="card-title"><i class="fas fa-chart-line"></i> SACS Report — Simple Automated Cash Flow</div>
+
+        <div id="sacs-report-content" style="background: white; padding: 30px;">
+          <!-- SACS Header -->
+          <div class="sacs-header">
+            <h2 id="sacs-title">Simple Automated Cash Flow (SACS)</h2>
+            <p class="sacs-subtitle" id="sacs-client-name">Client Name</p>
+            <p class="sacs-subtitle" id="sacs-report-date">Report Date</p>
+          </div>
+
+          <!-- Cashflow Diagram: Inflow → Outflow → Private Reserve -->
+          <div class="sacs-flow">
+            <div class="sacs-bubble bubble-inflow">
+              <span class="bubble-label">Inflow</span>
+              <span class="bubble-amount" id="sacs-inflow-val">$0</span>
+              <span class="bubble-period">/month</span>
+            </div>
+            <div class="sacs-arrow"></div>
+            <div class="sacs-bubble bubble-outflow">
+              <span class="bubble-label">Outflow</span>
+              <span class="bubble-amount" id="sacs-outflow-val">$0</span>
+              <span class="bubble-period">/month</span>
+            </div>
+            <div class="sacs-arrow"></div>
+            <div class="sacs-bubble bubble-reserve">
+              <span class="bubble-label">Excess</span>
+              <span class="bubble-amount" id="sacs-excess-val">$0</span>
+              <span class="bubble-period">/month</span>
+            </div>
+          </div>
+
+          <!-- Info Boxes -->
+          <div class="sacs-info-row">
+            <div class="sacs-info-box">
+              <div class="info-label">Private Reserve Balance</div>
+              <div class="info-value" id="sacs-pr-balance">$0</div>
+            </div>
+            <div class="sacs-info-box">
+              <div class="info-label">Schwab Investment</div>
+              <div class="info-value" id="sacs-schwab-balance">$0</div>
+            </div>
+            <div class="sacs-info-box">
+              <div class="info-label">Schwab Cash</div>
+              <div class="info-value" id="sacs-schwab-cash">$0</div>
+            </div>
+            <div class="sacs-info-box">
+              <div class="info-label">Private Reserve Target</div>
+              <div class="info-value" id="sacs-pr-target">$0</div>
+            </div>
+          </div>
+
+          <!-- Branding -->
+          <div style="text-align:center; margin-top:36px; padding-top:20px; border-top:1px solid var(--gray-200);">
+            <p style="font-size:0.72rem; color:var(--gray-400);">Prepared by EF Financial Planning</p>
+          </div>
+        </div>
+
+        <div class="d-flex gap-15 mt-20 justify-center">
+          <button class="btn btn-primary" onclick="downloadPDF('sacs')"><i class="fas fa-download"></i> Download SACS PDF</button>
+        </div>
+      </div>
+
+      <!-- ═══ TCC REPORT ═══ -->
+      <div class="card mb-28">
+        <div class="card-title"><i class="fas fa-chart-pie"></i> TCC Report — Total Client Chart</div>
+
+        <div id="tcc-report-content" style="background: white; padding: 30px;">
+          <!-- TCC Header -->
+          <div class="tcc-header">
+            <h2>Total Client Chart (TCC)</h2>
+            <p class="tcc-subtitle" id="tcc-client-name">Client Name</p>
+            <p class="tcc-subtitle" id="tcc-report-date">Report Date</p>
+          </div>
+
+          <!-- Client Info Badges -->
+          <div class="tcc-client-info" id="tcc-client-badges"></div>
+
+          <!-- Retirement Section -->
+          <div class="tcc-section" id="tcc-retirement-section"></div>
+
+          <!-- Non-Retirement Section -->
+          <div class="tcc-section" id="tcc-nonret-section"></div>
+
+          <!-- Trust Section -->
+          <div id="tcc-trust-section"></div>
+
+          <!-- Liabilities Section -->
+          <div class="tcc-section" id="tcc-liabilities-section"></div>
+
+          <!-- Grand Total -->
+          <div class="tcc-grand-total">
+            <div class="gt-label">Grand Total Net Worth</div>
+            <div class="gt-value" id="tcc-grand-total-val">$0</div>
+          </div>
+
+          <!-- Branding -->
+          <div style="text-align:center; margin-top:24px; padding-top:16px; border-top:1px solid var(--gray-200);">
+            <p style="font-size:0.72rem; color:var(--gray-400);">Prepared by EF Financial Planning</p>
+          </div>
+        </div>
+
+        <div class="d-flex gap-15 mt-20 justify-center">
+          <button class="btn btn-primary" onclick="downloadPDF('tcc')"><i class="fas fa-download"></i> Download TCC PDF</button>
+        </div>
+      </div>
+
+      <!-- Report History -->
+      <div class="card mb-20" id="history-section" style="display:none">
+        <div class="card-title"><i class="fas fa-clock-rotate-left"></i> Report History</div>
+        <div id="report-history-list"></div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="d-flex justify-center gap-15 mt-24">
+        <a href="clients.html" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Clients</a>
+        <a id="new-report-link" href="#" class="btn btn-primary"><i class="fas fa-plus"></i> Generate New Report</a>
+      </div>
+
+    </main>
+
+    <footer class="footer">
+      <span>© 2026 EF Financial Planning</span>
+      <span>Portal V1.0</span>
+    </footer>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const clientId = urlParams.get('id');
+
+      if (!clientId) return;
+
+      let client;
+      try {
+        client = await dataManager.getClient(clientId);
+      } catch (e) { return; }
+      if (!client) return;
+
+      // Get report data — try session first, then fetch from API
+      let report = dataManager.getCurrentReport();
+      if (!report) {
+        try {
+          report = await dataManager.getLatestReport(clientId);
+        } catch (e) { /* no previous report */ }
+      }
+      if (!report) {
+        app.showToast('No report data found. Please generate a report first.', 'error');
+        return;
+      }
+
+      const fc = app.formatCurrency.bind(app);
+      const clientName = report.clientName || (client.type === 'married' ? `${client.client1.name} & ${client.client2.name}` : client.client1.name);
+      const today = new Date();
+      const dateStr = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+      // ── Page Header ──
+      document.getElementById('client-name-display').textContent = clientName;
+      document.getElementById('report-date-display').textContent = dateStr;
+
+      // ═══════════════════════════════════
+      // SACS REPORT
+      // ═══════════════════════════════════
+      document.getElementById('sacs-client-name').textContent = clientName;
+      document.getElementById('sacs-report-date').textContent = dateStr;
+      document.getElementById('sacs-inflow-val').textContent = fc(report.inflow);
+      document.getElementById('sacs-outflow-val').textContent = fc(report.outflow);
+      document.getElementById('sacs-excess-val').textContent = fc(report.excess);
+      document.getElementById('sacs-pr-balance').textContent = fc(report.prBalance);
+      document.getElementById('sacs-schwab-balance').textContent = fc(report.schwabBalance);
+      document.getElementById('sacs-schwab-cash').textContent = fc(report.schwabCash || 0);
+      document.getElementById('sacs-pr-target').textContent = fc(report.prTarget);
+
+      // ═══════════════════════════════════
+      // TCC REPORT
+      // ═══════════════════════════════════
+      document.getElementById('tcc-client-name').textContent = clientName;
+      document.getElementById('tcc-report-date').textContent = dateStr;
+
+      // Client Info Badges
+      let badgesHtml = `
+        <div class="tcc-client-badge">
+          <div>
+            <strong>${client.client1.name}</strong>
+            <div class="client-detail">Age: ${client.client1.age} | DOB: ${client.client1.dob} | SSN: ***-**-${client.client1.ssnLast4}</div>
+          </div>
+        </div>
+      `;
+      if (client.type === 'married' && client.client2.name) {
+        badgesHtml += `
+          <div class="tcc-client-badge">
+            <div>
+              <strong>${client.client2.name}</strong>
+              <div class="client-detail">Age: ${client.client2.age} | DOB: ${client.client2.dob} | SSN: ***-**-${client.client2.ssnLast4}</div>
+            </div>
+          </div>
+        `;
+      }
+      document.getElementById('tcc-client-badges').innerHTML = badgesHtml;
+
+      // ── Retirement Section ──
+      let retHtml = '<div class="tcc-section-title">Retirement Accounts</div>';
+
+      // Client 1
+      retHtml += `<p class="text-sm fw-700 text-muted mb-8">${client.client1.name}</p><div class="tcc-bubbles">`;
+      report.retirementC1.forEach(acct => {
+        retHtml += `
+          <div class="tcc-account-bubble">
+            <div class="acct-type">${acct.type}</div>
+            <div class="acct-balance">${fc(acct.balance)}</div>
+          </div>
+        `;
+      });
+      retHtml += `</div>`;
+      retHtml += `
+        <div class="tcc-total-box">
+          <span class="total-label">${client.client1.name} Retirement Total</span>
+          <span class="total-value">${fc(report.retirementC1Total)}</span>
+        </div>
+      `;
+
+      // Client 2
+      if (client.type === 'married' && report.retirementC2 && report.retirementC2.length > 0) {
+        retHtml += `<p class="text-sm fw-700 text-muted mb-8 mt-20">${client.client2.name}</p><div class="tcc-bubbles">`;
+        report.retirementC2.forEach(acct => {
+          retHtml += `
+            <div class="tcc-account-bubble">
+              <div class="acct-type">${acct.type}</div>
+              <div class="acct-balance">${fc(acct.balance)}</div>
+            </div>
+          `;
+        });
+        retHtml += `</div>`;
+        retHtml += `
+          <div class="tcc-total-box">
+            <span class="total-label">${client.client2.name} Retirement Total</span>
+            <span class="total-value">${fc(report.retirementC2Total)}</span>
+          </div>
+        `;
+      }
+      document.getElementById('tcc-retirement-section').innerHTML = retHtml;
+
+      // ── Non-Retirement Section ──
+      let nrHtml = '<div class="tcc-section-title">Non-Retirement Accounts</div><div class="tcc-bubbles">';
+      report.nonRetirement.forEach(acct => {
+        nrHtml += `
+          <div class="tcc-account-bubble">
+            <div class="acct-type">${acct.type}</div>
+            <div class="acct-balance">${fc(acct.balance)}</div>
+          </div>
+        `;
+      });
+      nrHtml += `</div>`;
+      nrHtml += `
+        <div class="tcc-total-box">
+          <span class="total-label">Non-Retirement Total</span>
+          <span class="total-value">${fc(report.nonRetirementTotal)}</span>
+        </div>
+      `;
+      document.getElementById('tcc-nonret-section').innerHTML = nrHtml;
+
+      // ── Trust Section ──
+      let trustHtml = '';
+      if (report.trustAddress) {
+        trustHtml = `
+          <div class="tcc-trust-box">
+            <div class="trust-label"><i class="fas fa-house"></i> Trust</div>
+            <div class="trust-address">${report.trustAddress}</div>
+            <div class="trust-value">${fc(report.trustValue)}</div>
+          </div>
+        `;
+      }
+      document.getElementById('tcc-trust-section').innerHTML = trustHtml;
+
+      // ── Liabilities Section ──
+      let liabHtml = '<div class="tcc-section-title">Liabilities (Displayed Separately — NOT Subtracted from Net Worth)</div><div class="tcc-bubbles">';
+      report.liabilities.forEach(l => {
+        liabHtml += `
+          <div class="tcc-liability-bubble">
+            <div class="liab-type">${l.type}</div>
+            <div class="liab-rate">${l.rate}% interest</div>
+            <div class="liab-balance">${fc(l.balance)}</div>
+          </div>
+        `;
+      });
+      liabHtml += `</div>`;
+      if (report.liabilities.length > 0) {
+        liabHtml += `
+          <div class="tcc-total-box">
+            <span class="total-label">Total Liabilities</span>
+            <span class="total-value">${fc(report.liabilitiesTotal)}</span>
+          </div>
+        `;
+      }
+      document.getElementById('tcc-liabilities-section').innerHTML = liabHtml;
+
+      // Grand Total
+      document.getElementById('tcc-grand-total-val').textContent = fc(report.grandTotal);
+
+      // ── Report History ──
+      try {
+        const history = await dataManager.getReportHistory(clientId);
+        if (history.length > 0) {
+          document.getElementById('history-section').style.display = 'block';
+          let histHtml = '';
+          history.slice(0, 8).forEach(h => {
+            histHtml += `
+              <div class="report-history-item">
+                <div>
+                  <div class="rh-date">${h.date}</div>
+                  <div class="rh-type">SACS & TCC Report</div>
+                </div>
+                <span class="text-sm text-muted">Net Worth: ${fc(h.grandTotal || h.data?.grandTotal || 0)}</span>
+              </div>
+            `;
+          });
+          document.getElementById('report-history-list').innerHTML = histHtml;
+        }
+      } catch (e) { /* no history */ }
+
+      // Navigation
+      document.getElementById('new-report-link').href = `generate-report.html?id=${clientId}`;
+    });
+
+    // ═══════════════════════════════════
+    // PDF DOWNLOAD
+    // ═══════════════════════════════════
+    async function downloadPDF(type) {
+      const elementId = type === 'sacs' ? 'sacs-report-content' : 'tcc-report-content';
+      const element = document.getElementById(elementId);
+      const fileName = type === 'sacs' ? 'SACS_Report' : 'TCC_Report';
+
+      app.showToast('Generating PDF...', 'info');
+
+      try {
+        const canvas = await html2canvas(element, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#ffffff',
+          logging: false,
+        });
+
+        const { jsPDF } = window.jspdf;
+        const imgData = canvas.toDataURL('image/png');
+
+        // Calculate dimensions for PDF (Letter size)
+        const pdfWidth = 215.9; // mm
+        const pdfHeight = 279.4; // mm
+        const imgWidth = pdfWidth - 20; // 10mm margins
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        const pdf = new jsPDF({
+          orientation: imgHeight > pdfHeight ? 'portrait' : 'portrait',
+          unit: 'mm',
+          format: 'letter',
+        });
+
+        pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+        pdf.save(`${fileName}.pdf`);
+
+        app.showToast(`${fileName}.pdf downloaded successfully!`, 'success');
+      } catch (err) {
+        console.error('PDF generation error:', err);
+        app.showToast('Error generating PDF. Please try again.', 'error');
+      }
+    }
+  </script>
+</body>
+</html>

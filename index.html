@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — EF Financial Planning Portal</title>
+  <meta name="description" content="EF Financial Planning client report portal dashboard — manage clients and generate quarterly SACS and TCC reports.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="logo">EF Financial Planning</div>
+    <div class="user-info">Logged in as: Maryann</div>
+  </header>
+
+  <div class="app-container">
+    <nav class="sidebar">
+      <ul class="sidebar-nav">
+        <li><a href="index.html" class="active" id="nav-dashboard"><i class="fas fa-th-large"></i> Dashboard</a></li>
+        <li><a href="clients.html" id="nav-clients"><i class="fas fa-users"></i> Clients</a></li>
+        <li><a href="add-client.html" id="nav-add"><i class="fas fa-user-plus"></i> Add Client</a></li>
+      </ul>
+    </nav>
+
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1>Dashboard</h1>
+          <p class="subtitle">Welcome back — here's your client overview.</p>
+        </div>
+        <a href="add-client.html" class="btn btn-primary"><i class="fas fa-plus"></i> Add New Client</a>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="grid-3 mb-28">
+        <div class="card stat-card">
+          <div class="card-title">Total Clients</div>
+          <h3 id="stat-total-clients">–</h3>
+        </div>
+        <div class="card stat-card">
+          <div class="card-title">Reports This Quarter</div>
+          <h3 id="stat-reports">–</h3>
+        </div>
+        <div class="card stat-card">
+          <div class="card-title">Needs Report</div>
+          <h3 id="stat-needs-report">–</h3>
+          <span class="stat-label">no report in 90+ days</span>
+        </div>
+      </div>
+
+      <!-- Quick Access Client List -->
+      <div class="card mb-20">
+        <div class="card-title"><i class="fas fa-users"></i> Client Quick Access</div>
+        <div id="quick-clients-list"><p class="text-muted text-sm" style="padding:20px">Loading...</p></div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="card">
+        <div class="card-title"><i class="fas fa-clock-rotate-left"></i> Recent Report Activity</div>
+        <div id="activity-list"><p class="text-muted text-sm" style="padding:20px">Loading...</p></div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <span>© 2026 EF Financial Planning</span>
+      <span>Portal V1.0</span>
+    </footer>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        // Fetch stats and clients in parallel
+        const [stats, clients] = await Promise.all([
+          dataManager.getStats(),
+          dataManager.getClients(),
+        ]);
+
+        // Stats
+        document.getElementById('stat-total-clients').textContent = stats.totalClients;
+        document.getElementById('stat-reports').textContent = stats.reportsThisQuarter;
+        document.getElementById('stat-needs-report').textContent = stats.needsReport;
+
+        // Quick Access Client List
+        const quickList = document.getElementById('quick-clients-list');
+        if (clients.length === 0) {
+          quickList.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-user-plus"></i>
+              <p>No clients yet. Add your first client to get started.</p>
+              <a href="add-client.html" class="btn btn-primary"><i class="fas fa-plus"></i> Add Client</a>
+            </div>
+          `;
+        } else {
+          let html = '<table class="table"><thead><tr><th>Client</th><th>Type</th><th>Last Report</th><th>Actions</th></tr></thead><tbody>';
+          clients.forEach(c => {
+            const name = c.type === 'married' ? `${c.client1.name} & ${c.client2.name}` : c.client1.name;
+            const typeBadge = c.type === 'married'
+              ? '<span class="badge badge-married"><i class="fas fa-ring"></i> Married</span>'
+              : '<span class="badge badge-single"><i class="fas fa-user"></i> Single</span>';
+            const lastReport = c.lastReportDate || '—';
+
+            html += `
+              <tr>
+                <td><a href="add-client.html?id=${c.id}" class="client-link">${name}</a></td>
+                <td>${typeBadge}</td>
+                <td class="text-sm text-muted">${lastReport}</td>
+                <td class="actions-cell">
+                  <a href="generate-report.html?id=${c.id}" class="btn btn-primary btn-sm"><i class="fas fa-file-invoice"></i> Report</a>
+                </td>
+              </tr>
+            `;
+          });
+          html += '</tbody></table>';
+          quickList.innerHTML = html;
+        }
+
+        // Recent Activity
+        const activityDiv = document.getElementById('activity-list');
+        if (stats.recentActivity.length === 0) {
+          activityDiv.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-chart-line"></i>
+              <p>No reports generated yet. Generate your first report from a client profile.</p>
+            </div>
+          `;
+        } else {
+          let actHtml = '';
+          stats.recentActivity.forEach(a => {
+            actHtml += `
+              <div class="report-history-item">
+                <div>
+                  <div class="rh-date">${a.name}</div>
+                  <div class="rh-type">SACS & TCC Report Generated</div>
+                </div>
+                <span class="text-sm text-muted">${a.date}</span>
+              </div>
+            `;
+          });
+          activityDiv.innerHTML = actHtml;
+        }
+      } catch (err) {
+        console.error('Dashboard load error:', err);
+        app.showToast('Failed to load dashboard data', 'error');
+      }
+    });
+  </script>
+</body>
+</html>
